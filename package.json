@@ -58,21 +58,8 @@
   },
   "metadata": {
     "actions": [
-      {
-        "name": "actionName",
-        "parameters": [
-          {
-            "name": "parameterName",
-            "type": "String"
-          }
-        ]
-      }
     ],
     "data": [
-      {
-        "name": "dataName",
-        "type": "String"
-      }
     ],
     "settings": [
       {
