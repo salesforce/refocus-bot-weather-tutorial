@@ -26,6 +26,14 @@ class App extends React.Component {
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      temperature: nextProps.temperature,
+      weather: nextProps.weather,
+      location: nextProps.location
+    });
+  }
+
   render(){
     return (
       <div className="slds-grid slds-p-around_small">
@@ -52,7 +60,7 @@ class App extends React.Component {
 App.propTypes={
   temperature: PropTypes.number,
   weather: PropTypes.string,
-  location: PropTypes.object,
+  location: PropTypes.string,
 };
 
 module.exports=App;

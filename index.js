@@ -16,13 +16,14 @@
 
 require('dotenv').config();
 const express = require('express');
+const request = require('superagent');
 const app = express();
 const http = require('http');
 const io = require('socket.io-client');
 const env = process.env.NODE_ENV || 'dev';
 const PORT = process.env.PORT || 5000;
 const config = require('./config.js')[env];
-const { socketToken } = config;
+const { socketToken, weatherToken } = config;
 const packageJSON = require('./package.json');
 const bdk = require('@salesforce/refocus-bdk')(config);
 
@@ -35,6 +36,28 @@ app.on('refocus.events', handleEvents);
 app.on('refocus.bot.actions', handleActions);
 app.on('refocus.bot.data', handleData);
 app.on('refocus.room.settings', handleSettings);
+
+function getCurrentWeather(zip) {
+  return new Promise((resolve, reject) => {
+    request
+      .get('http://dataservice.accuweather.com/locations/v1/postalcodes/search?q=' + zip + '&apikey=' + weatherToken)
+      .end((err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          request
+            .get('http://dataservice.accuweather.com/currentconditions/v1/' + res.body[0].Key + '?apikey=' + weatherToken)
+            .end((error, response) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(response);
+              }
+            });
+        }
+      });
+  });
+}
 
 /**
  * When a refocus.events is dispatch it is handled here.
@@ -74,6 +97,15 @@ function handleData(data){
  */
 function handleActions(action){
   console.log('Bot action Activity', action);
+  if (action.name === 'getCurrentWeather'){
+    const id = action.id;
+    const params = action.parameters;
+    const zipCode = params.filter((param) =>
+      param.name === 'zipCode')[0].value;
+    getCurrentWeather(zipCode).then(function(result) {
+      bdk.respondBotActionNoLog(id, result.body[0]);
+    });
+  }
 }
 
 app.use(express.static('web/dist'));

@@ -25,6 +25,7 @@ const botName = require('../package.json').name;
 
 //Room Details
 const roomId = bdk.getRoomId();
+let zip = null;
 
 //Event Handling
 document.body.addEventListener('refocus.room.settings', handleSettings, false);
@@ -70,6 +71,10 @@ function handleData(data) {
  */
 function handleActions(action) {
   console.log('Bot Action Activity', action);
+  if (action.detail.name === 'getCurrentWeather') {
+    const response = action.detail.response;
+    renderUI(response.Temperature.Imperial.Value, response.WeatherText, zip);
+  }
 }
 
 /*
@@ -79,8 +84,21 @@ function init() {
   bdk.findRoom(roomId)
     .then((res) => {
       const settings = res.body.settings;
-      const zip = settings.currentZipCode ? settings.currentZipCode : '90210';
-      renderUI('70','Sunny',zip);
+      zip = settings.currentZipCode ? settings.currentZipCode : '90210';
+      const serviceReq = {
+        'name': 'getCurrentWeather',
+        'botId': botName,
+        'roomId': roomId,
+        'isPending': true,
+        'parameters': [
+          {
+            'name': 'zipCode',
+            'value': zip,
+          }
+        ]
+      };
+      bdk.createBotAction(serviceReq);
+      renderUI(null, null, null);
     })
 }
 
