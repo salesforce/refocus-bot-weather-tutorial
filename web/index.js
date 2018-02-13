@@ -76,7 +76,12 @@ function handleActions(action) {
  * The actions to take place before load.
  */
 function init() {
-  renderUI('70','Sunny','20171');
+  bdk.findRoom(roomId)
+    .then((res) => {
+      const settings = res.body.settings;
+      const zip = settings.currentZipCode ? settings.currentZipCode : '90210';
+      renderUI('70','Sunny',zip);
+    })
 }
 
 /**
