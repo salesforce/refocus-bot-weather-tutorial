@@ -24,9 +24,7 @@ const bdk = require('@salesforce/refocus-bdk')(config);
 const botName = require('../package.json').name;
 
 //Room Details
-var ROOMID = window.location.pathname.split('rooms/').length > 1 ? parseInt(window.location.pathname.split(
-  'rooms/')[1]) : 2;
-const roomId = parseInt(ROOMID); //ROOMID will be provided from the page DOM
+const roomId = bdk.getRoomId();
 
 //Event Handling
 document.body.addEventListener('refocus.room.settings', handleSettings, false);
@@ -78,15 +76,19 @@ function handleActions(action) {
  * The actions to take place before load.
  */
 function init() {
-  renderUI();
+  renderUI('70','Sunny','20171');
 }
 
 /**
  * Render the react components with the data and templates needed
  */
-function renderUI(){
+function renderUI(temp, currentWeather, currentLocation){
   ReactDOM.render(
-    <App />,
+    <App 
+      temperature={ temp }
+      weather={ currentWeather }
+      location={ currentLocation }
+    />,
     document.getElementById(botName)
   );
 }
