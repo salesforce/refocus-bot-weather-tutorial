@@ -23,15 +23,33 @@ class App extends React.Component {
       temperature: this.props.temperature ? this.props.temperature : 'N/A',
       weather: this.props.weather ? this.props.weather : 'Cant determine weather',
       location: this.props.location ? this.props.location : 'Location not found',
+      currentLocation: this.props.location ? this.props.location : 'Location not found',
+      getWeather: this.props.getWeather,
     };
+    this.changeLocation = this.changeLocation.bind(this);
+    this.clearChanges = this.clearChanges.bind(this);
+    this.sendLocation = this.sendLocation.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
     this.setState({
       temperature: nextProps.temperature,
       weather: nextProps.weather,
-      location: nextProps.location
+      location: nextProps.location,
+      currentLocation: nextProps.location
     });
+  }
+
+  changeLocation(e){
+    this.setState({ currentLocation: e.target.value });
+  }
+
+  clearChanges(){
+    this.setState({ currentLocation: this.state.location });
+  }
+
+  sendLocation(){
+    this.state.getWeather(this.state.currentLocation);
   }
 
   render(){
@@ -41,7 +59,20 @@ class App extends React.Component {
           <div className="slds-media slds-no-space slds-grow">
             <div className="slds-media__body">
               <h2 className="slds-text-heading_medium" id="weather">{this.state.weather}</h2>
-              <p className="slds-text-body_small slds-line-height_reset" id="location">{this.state.location}</p>
+              <p className="slds-text-body_small slds-line-height_reset" id="location">
+                <input
+                  type="text"
+                  name="locationInput"
+                  value={this.state.currentLocation}
+                  onBlur={this.clearChanges}
+                  onChange={this.changeLocation}
+                  onKeyPress={(event) => {
+                    if (event.key === 'Enter') {
+                      this.sendLocation();
+                    }
+                  }}
+                />
+              </p>
             </div>
           </div>
         </div>
@@ -61,6 +92,7 @@ App.propTypes={
   temperature: PropTypes.number,
   weather: PropTypes.string,
   location: PropTypes.string,
+  getWeather: PropTypes.func,
 };
 
 module.exports=App;

@@ -26,6 +26,8 @@ const botName = require('../package.json').name;
 //Room Details
 const roomId = bdk.getRoomId();
 let zip = null;
+let temperature = null;
+let weather = null;
 
 //Event Handling
 document.body.addEventListener('refocus.room.settings', handleSettings, false);
@@ -61,6 +63,10 @@ function handleSettings(room) {
  */
 function handleData(data) {
   console.log('Bot Data Activity', data);
+  zip = data.name === 'location' ? data.value : zip;
+  temperature = data.name === 'temperature' ? data.value : temperature;
+  weather = data.name === 'weather' ? data.value : weather;
+  renderUI(parseInt(temperature), weather, zip);
 }
 
 /**
@@ -73,33 +79,62 @@ function handleActions(action) {
   console.log('Bot Action Activity', action);
   if (action.detail.name === 'getCurrentWeather') {
     const response = action.detail.response;
-    renderUI(response.Temperature.Imperial.Value, response.WeatherText, zip);
+    temperature = response.Temperature.Imperial.Value + '';
+    weather = response.WeatherText;
+    bdk.upsertBotData(roomId, botName, 'temperature', temperature);
+    bdk.upsertBotData(roomId, botName, 'weather', weather);
   }
+}
+
+/*
+ * This function creates the action to get the weather from a location
+ *
+ * @param {Integer} newZip - Zip code of the weather location we want
+ */
+function getWeather(newZip){
+  zip = newZip;
+  bdk.upsertBotData(roomId, botName, 'location', newZip);
+  const serviceReq = {
+    'name': 'getCurrentWeather',
+    'botId': botName,
+    'roomId': roomId,
+    'isPending': true,
+    'parameters': [
+      {
+        'name': 'zipCode',
+        'value': newZip,
+      }
+    ]
+  };
+  bdk.createBotAction(serviceReq);
 }
 
 /*
  * The actions to take place before load.
  */
 function init() {
-  bdk.findRoom(roomId)
+  bdk.getBotData(roomId, botName)
     .then((res) => {
-      const settings = res.body.settings;
-      zip = settings.currentZipCode ? settings.currentZipCode : '90210';
-      const serviceReq = {
-        'name': 'getCurrentWeather',
-        'botId': botName,
-        'roomId': roomId,
-        'isPending': true,
-        'parameters': [
-          {
-            'name': 'zipCode',
-            'value': zip,
-          }
-        ]
-      };
-      bdk.createBotAction(serviceReq);
-      renderUI(null, null, null);
-    })
+      const data = res.body;
+      zip = data.filter((bd) => bd.name === 'location').length > 0 ?
+        data.filter((bd) => bd.name === 'location')[0].value : null;
+      temperature = data.filter((bd) => bd.name === 'temperature').length > 0 ?
+        data.filter((bd) => bd.name === 'temperature')[0].value : null;
+      weather = data.filter((bd) => bd.name === 'weather').length > 0 ?
+        data.filter((bd) => bd.name === 'weather')[0].value : null;
+      if (!zip) {
+        bdk.findRoom(roomId)
+        .then((res) => {
+          const settings = res.body.settings;
+          zip = settings.currentZipCode ? settings.currentZipCode : '90210';
+          getWeather(zip);
+          renderUI(null, null, null);  
+        });
+      } else {
+        getWeather(zip);
+        renderUI(parseInt(temperature), weather, zip);
+      }
+    });
 }
 
 /**
@@ -111,6 +146,7 @@ function renderUI(temp, currentWeather, currentLocation){
       temperature={ temp }
       weather={ currentWeather }
       location={ currentLocation }
+      getWeather={ getWeather }
     />,
     document.getElementById(botName)
   );
