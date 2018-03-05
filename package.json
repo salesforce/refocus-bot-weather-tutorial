@@ -84,8 +84,8 @@
   ],
     "settings": [
       {
-        "key": "dataName",
-        "helpText": "Describe the information needed in this setting"
+        "key": "currentZipCode",
+        "helpText": "The intial zip code for the weather if no other location is specificed in bot data"
       }
     ]
   }
