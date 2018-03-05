@@ -68,7 +68,20 @@
         ]
       }
     ],
-    "data": [],
+    "data": [
+    {
+      "name": "temperature",
+      "type": "INTEGER"     
+    },
+    {
+      "name": "weather",
+      "type": "STRING"     
+    },
+    {
+      "name": "location",
+      "type": "INTEGER"     
+    }
+  ],
     "settings": [
       {
         "key": "dataName",

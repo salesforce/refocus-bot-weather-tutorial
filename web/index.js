@@ -63,10 +63,26 @@ function handleSettings(room) {
  */
 function handleData(data) {
   console.log('Bot Data Activity', data);
-  zip = data.name === 'location' ? data.value : zip;
-  temperature = data.name === 'temperature' ? data.value : temperature;
-  weather = data.name === 'weather' ? data.value : weather;
-  renderUI(parseInt(temperature), weather, zip);
+  if(data.detail.name === 'location'){
+    zip = data.detail.value;
+    const serviceReq = {
+      'name': 'getCurrentWeather',
+      'botId': botName,
+      'roomId': roomId,
+      'isPending': true,
+      'parameters': [
+        {
+          'name': 'zipCode',
+          'value': zip,
+        }
+      ]
+    };
+    bdk.createBotAction(serviceReq);
+  } else {
+    temperature = data.detail.name === 'temperature' ? data.detail.value : temperature;
+    weather = data.detail.name === 'weather' ? data.detail.value : weather;
+    renderUI(parseInt(temperature), weather, zip);
+  }
 }
 
 /**
@@ -94,19 +110,6 @@ function handleActions(action) {
 function getWeather(newZip){
   zip = newZip;
   bdk.upsertBotData(roomId, botName, 'location', newZip);
-  const serviceReq = {
-    'name': 'getCurrentWeather',
-    'botId': botName,
-    'roomId': roomId,
-    'isPending': true,
-    'parameters': [
-      {
-        'name': 'zipCode',
-        'value': newZip,
-      }
-    ]
-  };
-  bdk.createBotAction(serviceReq);
 }
 
 /*
@@ -125,7 +128,7 @@ function init() {
       if (!zip) {
         bdk.findRoom(roomId)
         .then((res) => {
-          const settings = res.body.settings;
+          const settings = res.body.settings ? res.body.settings : {};
           zip = settings.currentZipCode ? settings.currentZipCode : '90210';
           getWeather(zip);
           renderUI(null, null, null);  

@@ -102,9 +102,17 @@ function handleActions(action){
     const params = action.parameters;
     const zipCode = params.filter((param) =>
       param.name === 'zipCode')[0].value;
-    getCurrentWeather(zipCode).then(function(result) {
-      bdk.respondBotActionNoLog(id, result.body[0]);
-    });
+      getCurrentWeather(zipCode).then(function(result) {
+        const eventObject = {
+          log: packageJSON.name +
+          ' got weather from ' + zipCode,
+          context: {
+            'type': 'Event',
+            'response': result.body[0]
+          },
+        };
+        bdk.respondBotAction(id, result.body[0], eventObject);
+      });
   }
 }
 
