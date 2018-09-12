@@ -57,3 +57,4 @@ If you have any ideas on how this project could be improved, please feel free. T
 Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-versioning#semver-for-publishers)
 
 * 1.0.0 Bot Created for Tutorial.
+* 1.0.1 Using bdk from npm and added licenses.

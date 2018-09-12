@@ -1,6 +1,6 @@
 {
   "name": "Weather-Bot",
-  "version": "0.0.5",
+  "version": "1.0.1",
   "description": "Bot scaffold for refocus bot development",
   "url": "https://git.soma.salesforce.com/Refocus-Bots/refocus-bot-scaffold",
   "scripts": {
@@ -69,19 +69,19 @@
       }
     ],
     "data": [
-    {
-      "name": "temperature",
-      "type": "INTEGER"     
-    },
-    {
-      "name": "weather",
-      "type": "STRING"     
-    },
-    {
-      "name": "location",
-      "type": "INTEGER"     
-    }
-  ],
+      {
+        "name": "temperature",
+        "type": "INTEGER"
+      },
+      {
+        "name": "weather",
+        "type": "STRING"
+      },
+      {
+        "name": "location",
+        "type": "INTEGER"
+      }
+    ],
     "settings": [
       {
         "key": "currentZipCode",
